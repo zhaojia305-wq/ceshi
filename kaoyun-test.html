@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>测你的考运命格 🔮</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+
+  :root {
+    --cosmos: #0D0B1E;
+    --deep: #1A1535;
+    --card: #211C40;
+    --purple: #7B5EA7;
+    --purple-light: #A07DD6;
+    --gold: #E8C97A;
+    --gold-soft: #F0DFA0;
+    --moon: #F5F0E8;
+    --mist: rgba(123,94,167,0.15);
+    --glow: rgba(232,201,122,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cosmos);
+    color: var(--moon);
+    font-family: 'Noto Sans SC', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 星空背景 */
+  #stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--d) ease-in-out infinite alternate;
+    opacity: 0;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: var(--o); transform: scale(1.2); }
+  }
+
+  /* 流动光晕 */
+  .aurora {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .aurora-1 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(123,94,167,0.25) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .aurora-2 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(232,201,122,0.12) 0%, transparent 70%);
+    bottom: 100px; left: -80px;
+    animation: drift 16s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes drift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(30px, 40px); }
+  }
+
+  /* 页面容器 */
+  .page {
+    position: relative;
+    z-index: 1;
+    display: none;
+    min-height: 100vh;
+    padding: 0 20px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .page.active { display: flex; }
+
+  /* ===== 封面页 ===== */
+  #cover {
+    text-align: center;
+    padding: 60px 24px;
+    gap: 0;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    border: 1px solid rgba(232,201,122,0.3);
+    padding: 5px 16px;
+    border-radius: 20px;
+    margin-bottom: 36px;
+    text-transform: uppercase;
+  }
+
+  .moon-icon {
+    font-size: 64px;
+    display: block;
+    margin-bottom: 24px;
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(232,201,122,0.4));
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .cover-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(28px, 7vw, 42px);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--moon);
+    margin-bottom: 8px;
+  }
+
+  .cover-title span {
+    color: var(--gold);
+  }
+
+  .cover-sub {
+    font-size: 13px;
+    color: rgba(245,240,232,0.5);
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+  }
+
+  .cover-divider {
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto 40px;
+  }
+
+  .cover-desc {
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(245,240,232,0.75);
+    max-width: 320px;
+    margin: 0 auto 48px;
+  }
+
+  .cover-desc em {
+    color: var(--gold-soft);
+    font-style: normal;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--purple) 0%, #5B3E8A 100%);
+    color: var(--moon);
+    border: none;
+    padding: 16px 48px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 32px rgba(123,94,167,0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+  }
+  .btn-primary:hover::before { left: 100%; }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(123,94,167,0.5);
+  }
+
+  .cover-note {
+    margin-top: 20px;
+    font-size: 12px;
+    color: rgba(245,240,232,0.3);
+  }
+
+  /* ===== 答题页 ===== */
+  #quiz {
+    padding: 40px 24px 60px;
+    gap: 0;
+    justify-content: flex-start;
+  }
+
+  .progress-wrap {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 32px;
+  }
+
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .progress-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--purple-light);
+    text-transform: uppercase;
+  }
+
+  .progress-count {
+    font-size: 12px;
+    color: rgba(245,240,232,0.4);
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 2px;
+    background: rgba(123,94,167,0.2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), var(--gold));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .question-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card);
+    border: 1px solid rgba(123,94,167,0.2);
+    border-radius: 20px;
+    padding: 32px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  .q-emoji {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .q-number {
+    font-size: 11px;
+    color: var(--purple-light);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .q-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--moon);
+    margin-bottom: 8px;
+  }
+
+  .q-hint {
+    font-size: 12px;
+    color: rgba(245,240,232,0.35);
+    margin-bottom: 28px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(123,94,167,0.2);
+    background: rgba(123,94,167,0.05);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: radial-gradient(circle, rgba(232,201,122,0.15) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+    border-radius: 50%;
+  }
+
+  .option:hover::after {
+    width: 200px;
+    height: 200px;
+  }
+
+  .option:hover {
+    border-color: rgba(232,201,122,0.4);
+    background: rgba(232,201,122,0.06);
+    transform: translateX(4px);
+  }
+
+  .option.selected {
+    border-color: var(--gold);
+    background: rgba(232,201,122,0.1);
+    box-shadow: 0 0 20px rgba(232,201,122,0.15);
+  }
+
+  .option-key {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(123,94,167,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--purple-light);
+    flex-shrink: 0;
+    transition: all 0.25s;
+    margin-top: 1px;
+  }
+
+  .option.selected .option-key {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--cosmos);
+    font-weight: 700;
+  }
+
+  .option-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.85);
+    flex: 1;
+  }
+
+  .option.selected .option-text {
+    color: var(--moon);
+  }
+
+  .btn-next {
+    width: 100%;
+    max-width: 420px;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--purple) 0%, #5B3E8A 100%);
+    color: var(--moon);
+    border: none;
+    border-radius: 50px;
+    font-size: 15px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 500;
+    letter-spacing: 1px;
+    cursor: pointer;
+    opacity: 0.3;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(123,94,167,0.3);
+  }
+
+  .btn-next.enabled {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .btn-next.enabled:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(123,94,167,0.45);
+  }
+
+  /* ===== 加载页 ===== */
+  #loading {
+    text-align: center;
+    gap: 24px;
+  }
+
+  .loading-orb {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, var(--purple-light), var(--purple), #3D2466);
+    box-shadow: 0 0 40px rgba(123,94,167,0.5), 0 0 80px rgba(123,94,167,0.2);
+    animation: pulse-orb 2s ease-in-out infinite;
+  }
+  @keyframes pulse-orb {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(123,94,167,0.5); }
+    50% { transform: scale(1.1); box-shadow: 0 0 60px rgba(123,94,167,0.7), 0 0 100px rgba(123,94,167,0.3); }
+  }
+
+  .loading-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 18px;
+    color: var(--moon);
+  }
+
+  .loading-sub {
+    font-size: 13px;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 1px;
+  }
+
+  .loading-dots span {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--purple-light);
+    margin: 0 3px;
+    animation: dot-bounce 1.2s ease-in-out infinite;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-8px); opacity: 1; }
+  }
+
+  /* ===== 结果页 ===== */
+  #result {
+    padding: 60px 24px;
+    text-align: center;
+    gap: 0;
+  }
+
+  .result-badge {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .result-icon {
+    font-size: 72px;
+    display: block;
+    margin-bottom: 20px;
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 24px rgba(232,201,122,0.5));
+  }
+
+  .result-type {
+    font-size: 12px;
+    color: var(--purple-light);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+
+  .result-name {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(26px, 6vw, 36px);
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .result-tagline {
+    font-size: 13px;
+    color: rgba(245,240,232,0.5);
+    margin-bottom: 36px;
+    letter-spacing: 1px;
+  }
+
+  .result-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card);
+    border: 1px solid rgba(232,201,122,0.2);
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin-bottom: 20px;
+    text-align: left;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(232,201,122,0.1);
+  }
+
+  .result-section-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .result-desc {
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(245,240,232,0.85);
+    margin-bottom: 24px;
+  }
+
+  .result-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .trait-tag {
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(232,201,122,0.3);
+    color: var(--gold-soft);
+    background: rgba(232,201,122,0.06);
+  }
+
+  .result-advice-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--purple-light);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .result-advice {
+    font-size: 14px;
+    line-height: 1.8;
+    color: rgba(245,240,232,0.7);
+  }
+
+  .result-divider {
+    width: 100%;
+    max-width: 420px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(123,94,167,0.3), transparent);
+    margin: 8px 0 20px;
+  }
+
+  .answer-string {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(123,94,167,0.08);
+    border: 1px dashed rgba(123,94,167,0.3);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 13px;
+    color: rgba(245,240,232,0.5);
+    text-align: center;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+  }
+
+  .answer-string span {
+    color: var(--purple-light);
+    font-weight: 500;
+  }
+
+  .btn-share {
+    width: 100%;
+    max-width: 420px;
+    padding: 15px;
+    background: linear-gradient(135deg, #B8860B 0%, var(--gold) 50%, #DAA520 100%);
+    color: var(--cosmos);
+    border: none;
+    border-radius: 50px;
+    font-size: 15px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 24px rgba(232,201,122,0.3);
+    transition: all 0.3s;
+  }
+  .btn-share:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(232,201,122,0.4);
+  }
+
+  .btn-retry {
+    font-size: 13px;
+    color: rgba(245,240,232,0.35);
+    background: none;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+  }
+  .btn-retry:hover { color: rgba(245,240,232,0.6); }
+
+  /* 响应式 */
+  @media (max-width: 375px) {
+    .cover-title { font-size: 26px; }
+    .question-card { padding: 24px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 星空 -->
+<div id="stars"></div>
+<div class="aurora aurora-1"></div>
+<div class="aurora aurora-2"></div>
+
+<!-- ===== 封面页 ===== -->
+<div class="page active" id="cover">
+  <span class="cover-badge">✦ 考运命格测试 ✦</span>
+  <span class="moon-icon">🔮</span>
+  <h1 class="cover-title">你的<span>考运命格</span><br>早就定了</h1>
+  <p class="cover-sub">凭直觉作答 · 7题解命</p>
+  <div class="cover-divider"></div>
+  <p class="cover-desc">
+    不用分析，不用想太多<br>
+    <em>第一感觉就是潜意识的答案</em><br><br>
+    你属于哪种上岸命格<br>
+    测完你就知道了
+  </p>
+  <button class="btn-primary" onclick="startQuiz()">开始测试 ✦</button>
+  <p class="cover-note">7题 · 约2分钟 · 结果即时解读</p>
+</div>
+
+<!-- ===== 答题页 ===== -->
+<div class="page" id="quiz">
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-label">✦ 命格感知中</span>
+      <span class="progress-count" id="progress-count">1 / 7</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:14%"></div>
+    </div>
+  </div>
+
+  <div class="question-card" id="question-card">
+    <!-- 动态渲染 -->
+  </div>
+
+  <button class="btn-next" id="btn-next" onclick="nextQuestion()">继续 →</button>
+</div>
+
+<!-- ===== 加载页 ===== -->
+<div class="page" id="loading">
+  <div class="loading-orb"></div>
+  <p class="loading-text">正在解读你的命格</p>
+  <p class="loading-sub">感知潜意识能量中</p>
+  <div class="loading-dots">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- ===== 结果页 ===== -->
+<div class="page" id="result">
+  <!-- 动态渲染 -->
+</div>
+
+<script>
+// ===== 星空生成 =====
+(function() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    star.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%;
+      left:${Math.random()*100}%;
+      --d:${Math.random()*3+2}s;
+      --o:${Math.random()*0.7+0.2};
+      animation-delay:${Math.random()*4}s;
+    `;
+    container.appendChild(star);
+  }
+})();
+
+// ===== 题目数据 =====
+const questions = [
+  {
+    emoji: '🌧️',
+    text: '深夜备考，窗外突然下雨了，你感觉到的第一个画面是？',
+    hint: '跟着第一感觉走',
+    options: [
+      '雨打在玻璃上，模糊了外面的灯光',
+      '积水倒映着路灯，像另一个世界',
+      '雨声盖住了所有声音，突然很安静',
+      '闻到了泥土和空气混合的味道'
+    ]
+  },
+  {
+    emoji: '🃏',
+    text: '凭直觉，选一张你最想翻开的塔罗牌',
+    hint: '不要想含义，只选感觉',
+    options: [
+      '🌕 月亮牌——模糊、直觉、隐藏的真相',
+      '⭐ 星星牌——希望、远方、还没到来的光',
+      '☀️ 太阳牌——清晰、能量、看得见的答案',
+      '🗼 高塔牌——突变、打破、重建的开始'
+    ]
+  },
+  {
+    emoji: '🌦️',
+    text: '如果你的备考状态是一种天气，你感觉现在是？',
+    hint: '不是你想要的天气，是你感觉到的',
+    options: [
+      '梅雨季——潮湿闷热，不知道什么时候放晴',
+      '多云转晴——偶尔有阳光但不稳定',
+      '暴风雨前的平静——压抑但有种奇怪的能量',
+      '深冬的晴天——冷，但光线很亮'
+    ]
+  },
+  {
+    emoji: '🔢',
+    text: '凭直觉选一个数字，你觉得它和你最有缘分',
+    hint: '闭上眼睛，脑海里第一个冒出来的',
+    options: ['3', '7', '11', '18']
+  },
+  {
+    emoji: '💧',
+    text: '你做梦梦到水，水的状态是？',
+    hint: '没梦到就选感觉最近的那个',
+    options: [
+      '平静的湖面，没有风',
+      '流动的河，不急不缓',
+      '翻涌的海浪，有点失控',
+      '看不见底的深水，想往下看'
+    ]
+  },
+  {
+    emoji: '🌙',
+    text: '考试前一晚，你想象自己会在哪里？',
+    hint: '你最真实的直觉答案',
+    options: [
+      '还在书桌前，灯还亮着',
+      '早早躺下了，但眼睛睁着',
+      '出去走了一圈，吹了会儿风',
+      '不知道，没想过这个画面'
+    ]
+  },
+  {
+    emoji: '🌿',
+    text: '凭直觉，选一种你觉得和你今年最像的植物',
+    hint: '第一眼看到哪个就选哪个',
+    options: [
+      '🌾 稻穗——越成熟越低头，厚积薄发',
+      '🌵 仙人掌——极端环境里反而活得很好',
+      '🌿 藤蔓——慢慢往上爬，但一定会到',
+      '🌸 樱花——短暂但很猛，爆发型选手'
+    ]
+  }
+];
+
+// ===== 4种命格（完整5模块版）=====
+const profiles = [
+  {
+    icon: '🌕',
+    type: '命格一',
+    name: '潜渊蓄势型',
+    tagline: '水面平静，深处暗流涌动',
+    traits: ['内敛积累', '后发制人', '感知力强', '耐压型'],
+    identity: '你是那种「看不出在努力，但从没停过」的人。能量藏在水面以下。',
+    personality: '你对外界的感知极度敏锐，别人的一句话、一个眼神都能影响你的状态——但你不会说出来。你习惯把情绪消化完再继续前进，所以别人眼里你总是「很稳」，但只有你知道那个稳是怎么撑出来的。你不擅长在人前展示努力，但这恰恰是你的保护色。',
+    fortune: '你的能量在蓄积期。现在可能感觉进展缓慢，但这是正常的——你属于后段爆发型，真正的状态会在距考试60天内集中释放。很多和你同命格的人，都是在最后阶段让所有人刮目相看的那个。',
+    weakness: '你最容易在「别人好像比我强」的时候崩掉。你对自己的要求远高于实际需要，一旦进度不如预期，会陷入自我怀疑的漩涡，甚至一天什么都做不了。这不是懒，是你的能量在自我消耗。',
+    advice: '停止横向对比，只和昨天的自己比。每天结束前写下「今天做到的一件事」，不管多小——这个动作会激活你的积累感，让你的能量重新流动起来。'
+  },
+  {
+    icon: '⭐',
+    type: '命格二',
+    name: '星途远引型',
+    tagline: '方向比速度更重要',
+    traits: ['目标感强', '直觉敏锐', '跨越式成长', '韧性型'],
+    identity: '你天生知道自己要去哪里，方向感是你最强的能力，也是别人羡慕不来的东西。',
+    personality: '你做决定从不完全靠逻辑，有一种说不清楚的直觉在引导你。这让你在别人还在纠结「要不要考」的时候，你早就在路上了。但你有个特点：状态来了可以连续高效学习十几个小时，状态不来的时候坐在书桌前一个字也看不进去。这不是意志力的问题，是你的能量运作方式。',
+    fortune: '你今年的考运有一个明显的「转折点」。前期可能感觉摸不着方向，但某一个时刻你会突然进入状态——那个状态一旦来了，你的效率会是平时的三倍。你需要做的是提前把那个触发条件找到，而不是等它自然来。',
+    weakness: '你最怕「努力了但感觉没用」的虚无感。一旦你感知不到进步，会开始怀疑这件事本身有没有意义——然后陷入存在主义式的迷茫，表面上还在学，心已经飘走了。',
+    advice: '给自己设一个「信号灯题目」——每周做一道你上周做错的题，如果做对了就是你在进步的证明。用具体的数据锚定自己，别让感觉骗了你。'
+  },
+  {
+    icon: '🗼',
+    type: '命格三',
+    name: '破局重建型',
+    tagline: '打破才能重新长出来',
+    traits: ['变化中生长', '压力下激活', '重建能力强', '爆发型'],
+    identity: '你不是在稳定中成长的人，你是在打破中重生的人。平静对你来说反而是危险的。',
+    personality: '你有一种普通人没有的能力——在压力极值的时候反而清醒。别人在考前崩溃，你可能反而进入了某种「冷静的战斗状态」。你这一生经历过的每一次重新开始，都让你比上一个版本更强。但这种能量需要一个触发点，没有触发点的时候，你会显得有些散。',
+    fortune: '你的考运不是平稳上升的曲线，而是阶梯式跃升。现在可能处于平台期，感觉怎么学都没突破——但这个平台期结束后，你会进入一个快速跃升阶段。那个节点往往由一件意想不到的事情触发，可能是一次模拟考的成绩，也可能是一句话。',
+    weakness: '你最容易因为「还没到那个状态」而拖延。你在等那个触发点自然到来，但它不会自己来——你需要主动制造压力，才能激活自己。',
+    advice: '现在就报一场模拟考或者给自己设一个「假截止日期」。人为制造压力，主动触发你的战斗模式。你不需要等状态，你需要制造状态。'
+  },
+  {
+    icon: '🌸',
+    type: '命格四',
+    name: '静水流深型',
+    tagline: '慢不是弱，是另一种力量',
+    traits: ['细水长流', '情绪稳定', '善于感知', '持久型'],
+    identity: '你是细水长流的人。不靠爆发，靠每天那一点点积累——但这恰恰是最难被打败的方式。',
+    personality: '你情绪稳定，极少大起大落。别人在焦虑的时候你还能睡着，别人在亢奋的时候你不会跟着躁动。这让你在别人集体焦虑的备考环境里，反而成了一个异类——但这是你的优势，不是缺陷。你对外界的评价不太敏感，你有自己内在的节奏感。',
+    fortune: '你的考运是所有命格里最「稳」的一种。没有大起大落，但也没有黑洞期。你现在做的每一件事都在累积，只是结果会在最后统一呈现。你不需要担心「够不够」，你需要担心的只有一件事：别在最后关头因为别人的焦虑传染自己。',
+    weakness: '你最大的风险不是能力，是「太稳了所以没有紧迫感」。你的节奏感很好，但有时候会低估时间流逝的速度，等回过神来发现离考试没多少天了才开始慌——那时候你的稳定优势会暂时失效。',
+    advice: '现在就把考试倒计时设在手机桌面上，每天看到它。不是为了制造焦虑，而是给你的稳定加一个「现实锚」。你不需要改变节奏，只需要确认节奏够快。'
+  }
+];
+
+// ===== 状态 =====
+let currentQ = 0;
+let answers = [];
+let selectedOption = null;
+
+// ===== 函数 =====
+function startQuiz() {
+  showPage('quiz');
+  renderQuestion();
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const card = document.getElementById('question-card');
+  selectedOption = null;
+
+  const optionsHTML = q.options.map((opt, i) => `
+    <div class="option" onclick="selectOption(${i}, this)">
+      <div class="option-key">${['A','B','C','D'][i]}</div>
+      <div class="option-text">${opt}</div>
+    </div>
+  `).join('');
+
+  card.innerHTML = `
+    <span class="q-emoji">${q.emoji}</span>
+    <div class="q-number">第 ${currentQ + 1} 题 · QUESTION ${currentQ + 1}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="q-hint">${q.hint}</div>
+    <div class="options">${optionsHTML}</div>
+  `;
+
+  // 更新进度
+  const pct = ((currentQ + 1) / questions.length * 100).toFixed(0);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-count').textContent = `${currentQ + 1} / ${questions.length}`;
+
+  // 禁用下一步
+  const btn = document.getElementById('btn-next');
+  btn.classList.remove('enabled');
+  btn.textContent = currentQ === questions.length - 1 ? '查看我的命格 🔮' : '继续 →';
+}
+
+function selectOption(idx, el) {
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedOption = idx;
+  document.getElementById('btn-next').classList.add('enabled');
+}
+
+function nextQuestion() {
+  if (selectedOption === null) return;
+  answers.push(selectedOption);
+
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    showLoading();
+  }
+}
+
+function showLoading() {
+  showPage('loading');
+  setTimeout(showResult, 2800);
+}
+
+function getProfile() {
+  const weights = [2, 2, 1, 1, 1, 1, 2];
+  const counts = [0, 0, 0, 0];
+  answers.forEach((a, i) => { counts[a] += weights[i]; });
+  const max = Math.max(...counts);
+  const idx = counts.indexOf(max);
+  return profiles[idx];
+}
+
+function getAnswerString() {
+  const keys = ['A','B','C','D'];
+  return answers.map((a, i) => `${i+1}${keys[a]}`).join('');
+}
+
+function showResult() {
+  const p = getProfile();
+  const ansStr = getAnswerString();
+  const resultPage = document.getElementById('result');
+
+  resultPage.innerHTML = `
+    <p class="result-badge">✦ 命格解读 ✦</p>
+    <span class="result-icon">${p.icon}</span>
+    <p class="result-type">${p.type}</p>
+    <h2 class="result-name">${p.name}</h2>
+    <p class="result-tagline">${p.tagline}</p>
+
+    <div class="result-card">
+      <p class="result-section-label">✦ 命格定性</p>
+      <p class="result-desc">${p.identity}</p>
+      <div class="result-traits">${p.traits.map(t => `<span class="trait-tag">${t}</span>`).join('')}</div>
+    </div>
+
+    <div class="result-card">
+      <p class="result-section-label">✦ 深度性格解读</p>
+      <p class="result-desc">${p.personality}</p>
+    </div>
+
+    <div class="result-card">
+      <p class="result-section-label">✦ 你的考运走势</p>
+      <p class="result-desc">${p.fortune}</p>
+    </div>
+
+    <div class="result-card">
+      <p class="result-section-label">✦ 你的致命弱点</p>
+      <p class="result-desc">${p.weakness}</p>
+    </div>
+
+    <div class="result-card">
+      <p class="result-section-label">✦ 破局建议</p>
+      <p class="result-desc">${p.advice}</p>
+    </div>
+
+    <div class="result-divider"></div>
+    <div class="answer-string">你的答案串：<span>${ansStr}</span></div>
+    <button class="btn-share" onclick="shareResult()">📤 分享给备考的朋友</button>
+    <button class="btn-retry" onclick="retryQuiz()">重新测一次</button>
+  `;
+
+  showPage('result');
+}
+
+function shareResult() {
+  if (navigator.share) {
+    navigator.share({
+      title: '测你的考运命格 🔮',
+      text: '我测出了我的考运命格，你也来测测？',
+      url: window.location.href
+    });
+  } else {
+    // 复制链接
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      alert('链接已复制，快去分享给备考的朋友吧 ✨');
+    });
+  }
+}
+
+function retryQuiz() {
+  currentQ = 0;
+  answers = [];
+  selectedOption = null;
+  showPage('cover');
+}
+</script>
+</body>
+</html>
